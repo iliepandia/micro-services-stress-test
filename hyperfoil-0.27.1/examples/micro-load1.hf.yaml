@@ -1,0 +1,140 @@
+name: micro-load1
+http:
+  host: http://localhost:8181
+  sharedConnections: 1500
+phases:
+  # Just hit the front end with requests for a simple page
+  - userIndexRampUp:
+      increasingRate:
+        duration: 5s
+        maxIterations: 10
+        maxSessions: 550
+        initialUsersPerSec:
+          base: 0
+          increment: 10
+        targetUsersPerSec:
+          base: 10
+          increment: 10
+        scenario:
+          - browse:
+              - httpRequest:
+                  GET: /users/
+                  sla:
+                    - meanResponseTime: 2s
+  # Do a buying session ramp up
+  # - User logs in
+  # - loads the product list
+  # - opens a product
+  # - places an order for a couple of products
+  # - executes a payment
+  - userBuyingRampUp:
+      increasingRate:
+        duration: 6
+        maxDuration: 20 #this was needed because some users hang for some reason!!!
+        maxIterations: 10
+        maxSessions: 120
+        initialUsersPerSec:
+          base: 0
+          increment: 3
+        targetUsersPerSec:
+          base: 3
+          increment: 3
+        scenario:
+          - login:
+              # load a valid email from a file
+              - randomCsvRow:
+                  file: emails.txt
+                  columns:
+                    0: email
+              - httpRequest:
+                  headers:
+                    accept: application/json
+                  POST: /users/api/login
+                  body:
+                    form:
+                      - name: email
+                        fromVar: email
+                      - name: password
+                        value: "password"
+                  handler:
+                    body:
+                      # extract the token
+                      json:
+                        query: ".access_token"
+                        toVar: token
+                  sla:
+                    - meanResponseTime: 2s
+          - get-product-list:
+              - httpRequest:
+                  GET: /products/api/list
+                  headers:
+                    accept: application/json
+                    authorization: Bearer ${token}
+                  sla:
+                    - meanResponseTime: 2s
+              - thinkTime:
+                  duration: 1s #user looks at the product for a bit
+          - look-at-a-product:
+              - httpRequest:
+                  GET: /products/api/1
+                  headers:
+                    accept: application/json
+                    authorization: Bearer ${token}
+                  sla:
+                    - meanResponseTime: 2s
+              - thinkTime:
+                  duration: 500ms #user looks at the product for a bit
+          - place-an-order:
+              - httpRequest:
+                  POST: /orders/api/create
+                  body:
+                    form:
+                      - name: "order_lines[0][product_id]"
+                        value: "1"
+                      - name: "order_lines[0][quantity]"
+                        value: "100"
+                      - name: "order_lines[1][product_id]"
+                        value: "2"
+                      - name: "order_lines[1][quantity]"
+                        value: "100"
+                      - name: "order_lines[2][product_id]"
+                        value: "3"
+                      - name: "order_lines[2][quantity]"
+                        value: "10"
+                  sla:
+                    - meanResponseTime: 2s
+                  headers:
+                    accept: application/json
+                    authorization: Bearer ${token}
+                  handler:
+                    body:
+                      # extract the order number
+                      json:
+                        query: ".id"
+                        toVar: order_id
+              - thinkTime:
+                  duration: 1s
+          - make-a-payment:
+              - httpRequest:
+                  POST: /payments/api/create
+                  body:
+                    form:
+                      - name: "order_id"
+                        fromVar: order_id
+                      - name: "transaction_id"
+                        value: "12345678901234567890"
+                      - name: "notes"
+                        value: "stress-test"
+                  headers:
+                    accept: application/json
+                    authorization: Bearer ${token}
+                  handler:
+                    body:
+                      # extract the order number
+                      json:
+                        query: ".id"
+                        toVar: payment_id
+                  sla:
+                    - meanResponseTime: 2s
+              - thinkTime:
+                  duration: 1s
