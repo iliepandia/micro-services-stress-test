@@ -11,16 +11,16 @@ phases:
         maxSessions: 550
         initialUsersPerSec:
           base: 0
-          increment: 10
+          increment: 5
         targetUsersPerSec:
-          base: 10
-          increment: 10
+          base: 5
+          increment: 5
         scenario:
           - browse:
               - httpRequest:
                   GET: /users/
                   sla:
-                    - meanResponseTime: 2s
+                    - meanResponseTime: 500ms
   # Do a buying session ramp up
   # - User logs in
   # - loads the product list
