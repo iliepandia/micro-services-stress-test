@@ -5,11 +5,15 @@ load for the micro-services API [here](https://github.com/iliepandia/micro-servi
 
 ![Async Demo](imgs/services-under-load.jpg)
 
-## Load Configuration file
+## Stress-Load Configuration file
 
-It simulates some general un-authenticated requests.
+This is the configuration file I am using the for load.
 
-On top of that it simulates a user flow:
+[micro-load1.hf.yaml](hyperfoil-0.27.1/examples/micro-load1.hf.yaml)
+
+It simulates some general un-authenticated requests and...
+
+on top of that it simulates a user flow:
 - login
 - browse the product list
 - place an order 
