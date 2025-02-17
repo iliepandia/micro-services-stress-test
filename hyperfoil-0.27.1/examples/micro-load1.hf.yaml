@@ -18,9 +18,9 @@ phases:
         scenario:
           - browse:
               - httpRequest:
-                  GET: /users/
+                  GET: /payments/
                   sla:
-                    - meanResponseTime: 500ms
+                    - meanResponseTime: 2s
   # Do a buying session ramp up
   # - User logs in
   # - loads the product list
