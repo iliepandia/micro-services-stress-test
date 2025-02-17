@@ -30,7 +30,7 @@ Scale services up and down see how the stress response is affected.
 
 ## Challenges
 
-1. I've run in many situations where the Virtual User would hamg
+1. I've run in many situations where the Virtual User would hang
    in Hyperfoil.io, and the solution was to for a maximum session time
    after which the session will be terminated, regardless of where the 
    user is in their flow. 
