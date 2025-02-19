@@ -30,7 +30,6 @@ phases:
   - userBuyingRampUp:
       increasingRate:
         duration: 6
-        maxDuration: 20 #this was needed because some users hang for some reason!!!
         maxIterations: 10
         maxSessions: 120
         initialUsersPerSec:
@@ -64,6 +63,7 @@ phases:
                         toVar: token
                   sla:
                     - meanResponseTime: 2s
+              - awaitVar: token  # we need to wait for this to be set, since the handler is async
           - get-product-list:
               - httpRequest:
                   GET: /products/api/list

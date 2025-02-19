@@ -1,0 +1,81 @@
+name: micro-sustain
+http:
+  host: http://localhost:8181
+  sharedConnections: 1500
+phases:
+  # Just hit the front end with requests for a simple page
+  - rampUp:
+      increasingRate:
+        duration: 10s
+        maxIterations: 1
+        maxSessions: 550
+        maxDuration: 20
+        initialUsersPerSec:
+          base: 0
+          increment: 5
+        targetUsersPerSec:
+          base: 30
+          increment: 5
+        scenario:
+          - browse:
+              - httpRequest:
+                  GET: /payments/
+                  sla:
+                    - meanResponseTime: 20s
+
+  # Sustain the load for 2 minutes
+  - sustain-payments:
+     constantRate:
+       duration: 2m
+       maxSessions: 220
+       usersPerSec: 30
+       scenario:
+         - browse:
+             - httpRequest:
+                 GET: /payments/
+                 sla:
+                   - meanResponseTime: 20s
+       startAfterStrict:
+          - rampUp
+  # Sustain the load for 2 minutes
+  - sustain-users:
+      constantRate:
+        duration: 2m
+        maxSessions: 220
+        usersPerSec: 30
+        scenario:
+          - browse:
+              - httpRequest:
+                  GET: /users/
+                  sla:
+                    - meanResponseTime: 20s
+        startAfterStrict:
+          - rampUp
+  # Sustain the load for 2 minutes
+  - sustain-orders:
+      constantRate:
+        duration: 2m
+        maxSessions: 220
+        usersPerSec: 30
+        scenario:
+          - browse:
+              - httpRequest:
+                  GET: /orders/
+                  sla:
+                    - meanResponseTime: 20s
+        startAfterStrict:
+          - rampUp
+  # Sustain the load for 2 minutes
+  - sustain-products:
+      constantRate:
+        duration: 2m
+        maxSessions: 220
+        usersPerSec: 30
+        scenario:
+          - browse:
+              - httpRequest:
+                  GET: /orders/
+                  sla:
+                    - meanResponseTime: 20s
+        startAfterStrict:
+          - rampUp
